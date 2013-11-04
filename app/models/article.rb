@@ -121,6 +121,25 @@ class Article < Content
     end
 
   end
+  
+  def merge(article2_id)
+    article2 = Article.find(article2_id)
+      
+    self.update_attributes(:body => self.body + article2.body)
+    self.save
+
+    comments = Feedback.find_all_by_article_id(article2_id)
+      
+    if !comments.empty?
+      comments.each do |comment|
+        comment.article_id = self.id
+        comment.save
+      end
+    end
+
+    Article.destroy(article2_id)
+    self
+  end
 
   def year_url
     published_at.year.to_s
